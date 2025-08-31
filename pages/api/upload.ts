@@ -23,7 +23,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       uploadDir: tempDir,
       keepExtensions: true,
       maxFiles: 10,
-      maxFileSize: 10 * 1024 * 1024, // 10MB limit
+      maxFileSize: 50 * 1024 * 1024, // 50MB limit
+      maxTotalFileSize: 100 * 1024 * 1024, // 100MB total limit
     });
 
     const [fields, files] = await form.parse(req);
@@ -64,7 +65,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   } catch (error: any) {
     console.error("Upload error:", error);
-    res.status(500).json({ error: error.message || "Upload failed" });
+    
+    // Provide more specific error messages
+    let errorMessage = "Upload failed";
+    if (error.code === 1009) {
+      errorMessage = "File too large. Maximum file size is 50MB.";
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    res.status(500).json({ error: errorMessage });
   }
 }
 
