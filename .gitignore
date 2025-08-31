@@ -1,0 +1,21 @@
+# Node/Next
+node_modules/
+.next/
+dist/
+build/
+.out/
+*.log
+
+# Local config & secrets
+.env
+.env.*
+!.env.example
+
+# RAG data & local artifacts
+data/
+docs/
+share-pack.txt
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
