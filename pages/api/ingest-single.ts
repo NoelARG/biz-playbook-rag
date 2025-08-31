@@ -25,7 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
          // Run ingestion for this specific file using enhanced script
-     const { stdout, stderr } = await execAsync(`npm run ingest:file${filename}`, {
+     const { stdout, stderr } = await execAsync(`npm run ingest:file -- "${filename}"`, {
        cwd: process.cwd(),
      });
 
