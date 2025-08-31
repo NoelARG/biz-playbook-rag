@@ -7,7 +7,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const status = checkDocumentStatus("./docs");
+    const status = await checkDocumentStatus("./docs");
     
     if (!status) {
       console.warn("Document status check returned null, returning empty status");
