@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { writeFile, mkdir } from "fs/promises";
+import { writeFile, mkdir, copyFile, unlink } from "fs/promises";
 import { join } from "path";
 import formidable from "formidable";
 
@@ -44,11 +44,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         await mkdir(join(process.cwd(), "docs"), { recursive: true });
         
         // Copy file to docs directory with original name
-        const fs = require('fs');
-        fs.copyFileSync(file.filepath, filePath);
+        await copyFile(file.filepath, filePath);
         
         // Clean up temp file
-        fs.unlinkSync(file.filepath);
+        await unlink(file.filepath);
         
         results.push({
           name: fileName,
