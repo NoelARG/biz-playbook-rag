@@ -23,8 +23,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       uploadDir: tempDir,
       keepExtensions: true,
       maxFiles: 10,
-      maxFileSize: 50 * 1024 * 1024, // 50MB limit
-      maxTotalFileSize: 100 * 1024 * 1024, // 100MB total limit
+      maxFileSize: 100 * 1024 * 1024, // 100MB limit
+      maxTotalFileSize: 500 * 1024 * 1024, // 500MB total limit
     });
 
     const [fields, files] = await form.parse(req);

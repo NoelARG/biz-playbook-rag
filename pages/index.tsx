@@ -559,7 +559,7 @@ export default function Home() {
         </div>
         
         <div className="text-sm text-gray-600">
-          Click "Run Ingestion" to process uploaded documents and make them searchable. Use "Analyze Documents" to see detailed statistics.
+          Click "Run Ingestion" to process only new/modified documents. Use "Analyze Documents" to see detailed statistics.
         </div>
       </div>
     </div>
