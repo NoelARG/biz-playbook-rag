@@ -21,6 +21,9 @@ export default function Home() {
   const [isLoadingDocs, setIsLoadingDocs] = useState(false);
   const [documentStatus, setDocumentStatus] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState<string | null>(null);
+  const [isRunningIngestion, setIsRunningIngestion] = useState(false);
+  const [showNotification, setShowNotification] = useState<{type: 'success' | 'error', message: string} | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -313,7 +316,10 @@ export default function Home() {
               try {
                 const response = await fetch('/api/upload', { method: 'POST', body: formData });
                 if (response.ok) {
-                  alert('Files uploaded successfully! Run ingestion to process them.');
+                  setShowNotification({
+                    type: 'success',
+                    message: 'Files uploaded successfully! Run ingestion to process them.'
+                  });
                   // Refresh the document list
                   loadDocuments();
                 } else {
@@ -418,6 +424,7 @@ export default function Home() {
                       return (
                         <button
                           onClick={async () => {
+                            setIsProcessing(doc.name);
                             try {
                               const response = await fetch('/api/ingest-single', {
                                 method: 'POST',
@@ -425,19 +432,31 @@ export default function Home() {
                                 body: JSON.stringify({ filename: doc.name })
                               });
                               if (response.ok) {
-                                alert(`${doc.name} processed successfully!`);
+                                setShowNotification({
+                                  type: 'success',
+                                  message: `${doc.name} processed successfully!`
+                                });
                                 // Refresh status after processing
                                 loadDocumentStatus();
                               } else {
-                                alert('Processing failed');
+                                setShowNotification({
+                                  type: 'error',
+                                  message: 'Processing failed'
+                                });
                               }
                             } catch (error) {
-                              alert('Processing error: ' + error);
+                              setShowNotification({
+                                type: 'error',
+                                message: `Processing error: ${error}`
+                              });
+                            } finally {
+                              setIsProcessing(null);
                             }
                           }}
-                          className="px-3 py-1 text-sm text-green-600 hover:text-green-800 hover:bg-green-50 rounded border border-green-200"
+                          disabled={isProcessing === doc.name}
+                          className="px-3 py-1 text-sm text-green-600 hover:text-green-800 hover:bg-green-50 rounded border border-green-200 disabled:opacity-50"
                         >
-                          Process
+                          {isProcessing === doc.name ? 'Processing...' : 'Process'}
                         </button>
                       );
                     }
@@ -499,20 +518,35 @@ export default function Home() {
             </button>
             <button
               onClick={async () => {
+                setIsRunningIngestion(true);
                 try {
                   const response = await fetch('/api/ingest', { method: 'POST' });
                   if (response.ok) {
-                    alert('Documents ingested successfully!');
+                    setShowNotification({
+                      type: 'success',
+                      message: 'Documents ingested successfully!'
+                    });
+                    // Refresh status after ingestion
+                    loadDocumentStatus();
                   } else {
-                    alert('Ingestion failed');
+                    setShowNotification({
+                      type: 'error',
+                      message: 'Ingestion failed'
+                    });
                   }
                 } catch (error) {
-                  alert('Ingestion error: ' + error);
+                  setShowNotification({
+                    type: 'error',
+                    message: `Ingestion error: ${error}`
+                  });
+                } finally {
+                  setIsRunningIngestion(false);
                 }
               }}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              disabled={isRunningIngestion}
+              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
             >
-              Run Ingestion
+              {isRunningIngestion ? 'Running...' : 'Run Ingestion'}
             </button>
           </div>
         </div>
@@ -559,6 +593,25 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      {/* Notification Toast */}
+      {showNotification && (
+        <div className={`fixed top-20 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 ${
+          showNotification.type === 'success' 
+            ? 'bg-green-500 text-white' 
+            : 'bg-red-500 text-white'
+        }`}>
+          <div className="flex items-center space-x-2">
+            <span>{showNotification.message}</span>
+            <button 
+              onClick={() => setShowNotification(null)}
+              className="ml-2 text-white hover:text-gray-200"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto flex h-screen">
