@@ -58,8 +58,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
+    // Auto-process uploaded files
+    if (results.length > 0) {
+      try {
+        const { exec } = require('child_process');
+        const { promisify } = require('util');
+        const execAsync = promisify(exec);
+        
+        // Process each uploaded file
+        for (const file of results) {
+          await execAsync(`npm run ingest:file -- "${file.name}"`, {
+            cwd: process.cwd(),
+          });
+        }
+      } catch (error) {
+        console.warn("Auto-processing failed:", error);
+        // Don't fail the upload if processing fails
+      }
+    }
+
     res.status(200).json({ 
-      message: "Files uploaded successfully", 
+      message: "Files uploaded and processed successfully", 
       files: results 
     });
 

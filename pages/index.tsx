@@ -318,7 +318,7 @@ export default function Home() {
                 if (response.ok) {
                   setShowNotification({
                     type: 'success',
-                    message: 'Files uploaded successfully! Run ingestion to process them.'
+                    message: 'Files uploaded and processed successfully!'
                   });
                   // Refresh the document list
                   loadDocuments();
